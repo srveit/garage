@@ -1,0 +1,26 @@
+{
+  "name": "garage",
+  "version": "1.0.0",
+  "description": "Garage door opener based on Raspberry Pi Zero W",
+  "main": "garage.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stephen R. Veit",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/srveit/node_projects.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "epoll": "^0.1.22",
+    "express": "^4.16.2",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "onoff": "^1.1.4",
+    "q": "^1.5.0",
+    "sleep-promise": "^2.0.0",
+    "sprintf-js": "^1.1.1",
+    "ws": "^4.0.0"
+  }
+}
