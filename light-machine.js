@@ -7,7 +7,7 @@ const express = require('express'),
   readline = require('readline'),
   sleep = require('sleep-promise'),
   url = require('url'),
-  { Server } = require('ws'),
+  WebSocket = require('ws'),
   { pressButton, setOutput, watchInputs } = require('./garage'),
   { inputPins, outputPins } = require('./garage-pins'),
   app = express();
@@ -173,32 +173,104 @@ app.use(function (req, res) {
   res.send({ msg: "hello" });
 });
 
-const createWebSocket = () => {
-  const server = http.createServer(app),
-    wss = new Server({ server });
+const isWebSocketAlive = webSocket => {
+  if (!webSocket) {
+    return false;
+  }
+  if (webSocket.isAlive === false) {
+    webSocket.terminate();
+    return false;
+  }
+  webSocket.isAlive = false;
+  try {
+    webSocket.ping(() => {});
+  } catch (error) {
+    if (error.code !== 'ECONNREFUSED') {
+      console.log('ping error', error);
+    }
+  }
+  return true;
+};
 
-  wss.on('connection', (ws, req) => {
+const newWebSocket = serverUrl => {
+  const webSocket = new WebSocket(serverUrl);
+
+  webSocket.on('open', () => {
+    console.log(`connected to ${serverUrl}`);
+    webSocket.alive = true;
+    webSocket.send('something from ' + os.hostname());
+  });
+
+  webSocket.on('message', data => {
+    webSocket.alive = true;
+  });
+
+  webSocket.on('pong', data => {
+    webSocket.isAlive = true;
+  });
+
+  webSocket.on('error', error => {
+    console.warn('error', error);
+  });
+  return webSocket;
+};
+
+const watchWebSockets = webSockets => {
+  setInterval(() => {
+    webSockets.server.clients.forEach(isWebSocketAlive);
+    if (webSockets.serverUrl && !isWebSocketAlive(webSockets.client)) {
+      webSockets.client = newWebSocket(webSockets.serverUrl);
+    }
+  }, 5000);
+};
+
+const sendEvent = (client, event) => {
+  if (client) {
+    console.log('sending', event);
+    client.send(event);
+  }
+};
+
+const createWebSockets = (app, serverUrl) => {
+  const server = http.createServer(app),
+    webSockets = {
+      server: new WebSocket.Server({ server }),
+      serverUrl,
+      client: serverUrl && newWebSocket(serverUrl)
+    };
+
+  webSockets.server.on('connection', (webSocket, req) => {
     const location = url.parse(req.url, true);
     // You might use location.query.access_token to authenticate or
     // share sessions or req.headers.cookie (see
     // http://stackoverflow.com/a/16395220/151312)
 
-    ws.on('message', message => {
+    webSocket.on('message', message => {
       console.log('received: %s', message);
     });
 
-    ws.send('something from ' + os.hostname());
+    webSocket.send('something from ' + os.hostname());
   });
 
-  server.listen(8080, () =>
-                console.info('Listening at http://localhost:%d', server.address().port));
+  server.listen(8080, () => console.info('Listening at http://localhost:%d',
+                                         server.address().port));
+  watchWebSockets(webSockets);
 
+  webSockets.sendEvents = events => {
+    if (webSockets.client) {
+      try {
+        events.map(event => webSockets.client.send(event));
+      } catch (error) {
+        console.error('error sending event', error);
+      }
+    }
+  };
+  return webSockets;
 };
 
-
-const main = () => {
-  const lightMachine = createLightMachine();
-  createWebSocket(lightMachine);
+const main = (serverUrl) => {
+  const lightMachine = createLightMachine(),
+    webSockets = createWebSockets(app, serverUrl);
   keyboardEvents(lightMachine);
   const logState = (state, oldState) => {
     const events = Object.keys(inputPins)
@@ -207,8 +279,15 @@ const main = () => {
             .map(event => event.name);
 //    console.log(events);
     events.map(event => lightMachine.handleEvent(event));
+    webSockets.sendEvents(events);
   };
   watchInputs(inputPins, logState);
 };
 
-main();
+if (process.argv.length < 2) {
+  console.error('error - missing server');
+  console.error(`usage: ${process.argv[0]} ${process.argv[1]} server`);
+  process.exit(1);
+}
+
+main(process.argv[2]);
