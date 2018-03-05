@@ -183,10 +183,10 @@ const isWebSocketAlive = webSocket => {
   }
   webSocket.isAlive = false;
   try {
-    webSocket.ping(() => {});
+    webSocket.ping();
   } catch (error) {
     if (error.code !== 'ECONNREFUSED') {
-      console.log('ping error', error);
+      console.warn('ping error', error);
     }
   }
   return true;
@@ -196,16 +196,21 @@ const newWebSocket = serverUrl => {
   const webSocket = new WebSocket(serverUrl);
 
   webSocket.on('open', () => {
-    console.log(`connected to ${serverUrl}`);
-    webSocket.alive = true;
+    console.info(`connected to ${serverUrl}`);
+    webSocket.isAlive = true;
     webSocket.send('something from ' + os.hostname());
   });
 
   webSocket.on('message', data => {
-    webSocket.alive = true;
+    webSocket.isAlive = true;
+    console.info('message', data.toString());
   });
 
   webSocket.on('pong', data => {
+    webSocket.isAlive = true;
+  });
+
+  webSocket.on('ping', data => {
     webSocket.isAlive = true;
   });
 
@@ -226,8 +231,11 @@ const watchWebSockets = webSockets => {
 
 const sendEvent = (client, event) => {
   if (client) {
-    console.log('sending', event);
-    client.send(event);
+    try {
+      client.send(JSON.stringify(event, null, 2));
+    } catch (error) {
+      console.error('error sending event', error.toString());
+    }
   }
 };
 
@@ -245,8 +253,23 @@ const createWebSockets = (app, serverUrl) => {
     // share sessions or req.headers.cookie (see
     // http://stackoverflow.com/a/16395220/151312)
 
-    webSocket.on('message', message => {
-      console.log('received: %s', message);
+    webSocket.isAlive = true;
+
+    webSocket.on('message', data => {
+      webSocket.isAlive = true;
+      console.info('message', data.toString());
+    });
+
+    webSocket.on('pong', data => {
+      webSocket.isAlive = true;
+    });
+
+    webSocket.on('ping', data => {
+      webSocket.isAlive = true;
+    });
+
+    webSocket.on('error', error => {
+      console.warn('error', error);
     });
 
     webSocket.send('something from ' + os.hostname());
@@ -257,13 +280,7 @@ const createWebSockets = (app, serverUrl) => {
   watchWebSockets(webSockets);
 
   webSockets.sendEvents = events => {
-    if (webSockets.client) {
-      try {
-        events.map(event => webSockets.client.send(event));
-      } catch (error) {
-        console.error('error sending event', error);
-      }
-    }
+    events.map(event => sendEvent(webSockets.client, event));
   };
   return webSockets;
 };
@@ -275,10 +292,9 @@ const main = (serverUrl) => {
   const logState = (state, oldState) => {
     const events = Object.keys(inputPins)
             .map(input => generateEvent(input, state, oldState))
-            .filter(event => event)
-            .map(event => event.name);
-//    console.log(events);
-    events.map(event => lightMachine.handleEvent(event));
+            .filter(event => event);
+
+    events.map(event => lightMachine.handleEvent(event.name));
     webSockets.sendEvents(events);
   };
   watchInputs(inputPins, logState);
