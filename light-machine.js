@@ -1,13 +1,15 @@
 'use strict';
 const express = require('express'),
+  EventEmitter = require('events'),
   http = require('http'),
   _ = require('lodash'),
   moment = require('moment'),
   os = require('os'),
   readline = require('readline'),
-  sleep = require('sleep-promise'),
   url = require('url'),
   WebSocket = require('ws'),
+  { createWebSockets } = require('../messaging'),
+  { createStateMachine } = require('../state-machine'),
   { pressButton, setOutput, watchInputs } = require('./garage'),
   { inputPins, outputPins } = require('./garage-pins'),
   app = express();
@@ -69,62 +71,8 @@ const machineDefinition = {
   ]
 };
 
-const createMachine = definition => {
-  definition = Object.assign({}, definition);
-  let currentState = definition.states[0];
-  console.info(moment().toISOString(), 'new state', currentState.name);
-  const methods = {};
-
-  const addMethod = (name, method) => methods[name] = method;
-
-  const handleEvent = event => {
-    console.info(moment().toISOString(), 'event', event);
-    const eventHandler = currentState.events[event];
-    if (!eventHandler) {
-//      console.warn('no event handler for', event);
-      return;
-    }
-    if (eventHandler.nextState) {
-      currentState =
-        definition.states.find(state => state.name === eventHandler.nextState);
-      console.info(moment().toISOString(), 'new state', currentState && currentState.name);
-    }
-    let actions = eventHandler.actions ||
-          (eventHandler.action ? [eventHandler.action] : []);
-    actions.forEach(action => {
-      let method, args;
-      if (_.isString(action)) {
-        method = action;
-        args = [];
-      } else {
-        method = action[0];
-        args = action.slice(1);
-      }
-      if (methods[method]) {
-        console.info(moment().toISOString(), 'action', method, args);
-        methods[method].apply(null, args);
-      } else {
-        console.log('no method for', method);
-      }
-    });
-  };
-
-  addMethod(
-    'setTimer',
-    duration => {
-      return sleep(duration)
-        .then(() => handleEvent('timer expired'));
-    }
-  );
-
-  return Object.freeze({
-    addMethod,
-    handleEvent
-  });
-};
-
 const createLightMachine = () => {
-  const { addMethod, handleEvent } = createMachine(machineDefinition);
+  const { addMethod, handleEvent } = createStateMachine(machineDefinition);
 
   addMethod(
     'setRelay',
@@ -152,19 +100,45 @@ const generateEvent = (name, state, oldState) => {
   return undefined;
 };
 
-const keyboardEvents = machine => {
+const newPinListener = () => {
+  const pinListener = new EventEmitter();
+
+  const logState = (state, oldState) => {
+    const events = Object.keys(inputPins)
+            .map(input => generateEvent(input, state, oldState))
+            .filter(event => event);
+
+    events.map(event => pinListener.emit('event', event));
+  };
+  watchInputs(inputPins, logState);
+  return pinListener;
+};
+
+const newKeyboardListener = () => {
+  const keyboardListener = new EventEmitter();
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
   process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && key.name === 'c') {
-      process.exit();
+      keyboardListener.emit('exit');
     } else if (key.name === 'l') {
-      machine.handleEvent('turn light off');
+      keyboardListener.emit('event', {
+        source: os.hostname(),
+        type: 'event',
+        name: 'turn light off',
+        time: moment()
+      });
     } else if (key.name === 'o') {
-      machine.handleEvent('turn light on');
+      keyboardListener.emit('event', {
+        source: os.hostname(),
+        type: 'event',
+        name: 'turn light on',
+        time: moment()
+      });
     }
   });
   console.log('Press "O" to turn on light, "L" to turn off light.');
+  return keyboardListener;
 };
 
 app.get('/', (req, res) => res.send('Hello World!'));
@@ -172,62 +146,6 @@ app.get('/', (req, res) => res.send('Hello World!'));
 app.use(function (req, res) {
   res.send({ msg: "hello" });
 });
-
-const isWebSocketAlive = webSocket => {
-  if (!webSocket) {
-    return false;
-  }
-  if (webSocket.isAlive === false) {
-    webSocket.terminate();
-    return false;
-  }
-  webSocket.isAlive = false;
-  try {
-    webSocket.ping();
-  } catch (error) {
-    if (error.code !== 'ECONNREFUSED') {
-      console.warn('ping error', error);
-    }
-  }
-  return true;
-};
-
-const newWebSocket = serverUrl => {
-  const webSocket = new WebSocket(serverUrl);
-
-  webSocket.on('open', () => {
-    console.info(`connected to ${serverUrl}`);
-    webSocket.isAlive = true;
-    webSocket.send('something from ' + os.hostname());
-  });
-
-  webSocket.on('message', data => {
-    webSocket.isAlive = true;
-    console.info('message', data.toString());
-  });
-
-  webSocket.on('pong', data => {
-    webSocket.isAlive = true;
-  });
-
-  webSocket.on('ping', data => {
-    webSocket.isAlive = true;
-  });
-
-  webSocket.on('error', error => {
-    console.warn('error', error);
-  });
-  return webSocket;
-};
-
-const watchWebSockets = webSockets => {
-  setInterval(() => {
-    webSockets.server.clients.forEach(isWebSocketAlive);
-    if (webSockets.serverUrl && !isWebSocketAlive(webSockets.client)) {
-      webSockets.client = newWebSocket(webSockets.serverUrl);
-    }
-  }, 5000);
-};
 
 const sendEvent = (client, event) => {
   if (client) {
@@ -239,65 +157,21 @@ const sendEvent = (client, event) => {
   }
 };
 
-const createWebSockets = (app, serverUrl) => {
-  const server = http.createServer(app),
-    webSockets = {
-      server: new WebSocket.Server({ server }),
-      serverUrl,
-      client: serverUrl && newWebSocket(serverUrl)
-    };
-
-  webSockets.server.on('connection', (webSocket, req) => {
-    const location = url.parse(req.url, true);
-    // You might use location.query.access_token to authenticate or
-    // share sessions or req.headers.cookie (see
-    // http://stackoverflow.com/a/16395220/151312)
-
-    webSocket.isAlive = true;
-
-    webSocket.on('message', data => {
-      webSocket.isAlive = true;
-      console.info('message', data.toString());
-    });
-
-    webSocket.on('pong', data => {
-      webSocket.isAlive = true;
-    });
-
-    webSocket.on('ping', data => {
-      webSocket.isAlive = true;
-    });
-
-    webSocket.on('error', error => {
-      console.warn('error', error);
-    });
-
-    webSocket.send('something from ' + os.hostname());
-  });
-
-  server.listen(8080, () => console.info('Listening at http://localhost:%d',
-                                         server.address().port));
-  watchWebSockets(webSockets);
-
-  webSockets.sendEvents = events => {
-    events.map(event => sendEvent(webSockets.client, event));
-  };
-  return webSockets;
-};
-
 const main = (serverUrl) => {
   const lightMachine = createLightMachine(),
-    webSockets = createWebSockets(app, serverUrl);
-  keyboardEvents(lightMachine);
-  const logState = (state, oldState) => {
-    const events = Object.keys(inputPins)
-            .map(input => generateEvent(input, state, oldState))
-            .filter(event => event);
+    webSockets = createWebSockets(app, serverUrl),
+    keyboardListener = newKeyboardListener(),
+    pinListener = newPinListener();
 
-    events.map(event => lightMachine.handleEvent(event.name));
-    webSockets.sendEvents(events);
-  };
-  watchInputs(inputPins, logState);
+  keyboardListener.on('exit', () => process.exit(0));
+  keyboardListener.on('event', event => {
+    lightMachine.handleEvent(event.name);
+    webSockets.sendEvents([event]);
+  });
+  pinListener.on('event', event => {
+    lightMachine.handleEvent(event.name);
+    webSockets.sendEvents([event]);
+  });
 };
 
 if (process.argv.length < 2) {
