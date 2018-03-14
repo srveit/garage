@@ -7,11 +7,10 @@ const express = require('express'),
   os = require('os'),
   readline = require('readline'),
   url = require('url'),
-  WebSocket = require('ws'),
-  { createWebSockets } = require('../messaging'),
-  { createStateMachine } = require('../state-machine'),
-  { pressButton, setOutput, watchInputs } = require('./garage'),
-  { inputPins, outputPins } = require('./garage-pins'),
+  {createWebSockets} = require('../messaging'),
+  {createStateMachine} = require('../state-machine'),
+  {pressButton, setOutput, watchInputs} = require('./garage'),
+  {inputPins, outputPins} = require('./garage-pins'),
   app = express();
 
 const machineDefinition = {
