@@ -158,7 +158,7 @@ const sendEvent = (client, event) => {
 
 const main = (serverUrl) => {
   const lightMachine = createLightMachine(),
-    webSockets = createWebSockets(app, serverUrl),
+    webSockets = createWebSockets({app, serverUrl}),
     keyboardListener = newKeyboardListener(),
     pinListener = newPinListener();
 
