@@ -7,7 +7,7 @@ const express = require('express'),
   os = require('os'),
   readline = require('readline'),
   url = require('url'),
-  {createWebSockets} = require('../messaging'),
+  {createMessaging} = require('../messaging'),
   {createStateMachine} = require('../state-machine'),
   {pressButton, setOutput, watchInputs} = require('./garage'),
   {inputPins, outputPins} = require('./garage-pins'),
@@ -146,31 +146,23 @@ app.use(function (req, res) {
   res.send({ msg: "hello" });
 });
 
-const sendEvent = (client, event) => {
-  if (client) {
-    try {
-      client.send(JSON.stringify(event, null, 2));
-    } catch (error) {
-      console.error('error sending event', error.toString());
-    }
-  }
-};
-
 const main = (serverUrl) => {
   const lightMachine = createLightMachine(),
-    webSockets = createWebSockets({app, serverUrl}),
+    messaging = createMessaging({app}),
     keyboardListener = newKeyboardListener(),
-    pinListener = newPinListener();
+    pinListener = newPinListener(),
+    to = 'raven';
 
   keyboardListener.on('exit', () => process.exit(0));
   keyboardListener.on('event', event => {
     lightMachine.handleEvent(event.name);
-    webSockets.sendEvents([event]);
+    messaging.send({to, message: event});
   });
   pinListener.on('event', event => {
     lightMachine.handleEvent(event.name);
-    webSockets.sendEvents([event]);
+    messaging.send({to, message: event});
   });
+  messaging.addClient(serverUrl);
 };
 
 if (process.argv.length < 2) {
