@@ -13,65 +13,67 @@ const express = require('express'),
   {inputPins, outputPins} = require('./garage-pins'),
   app = express();
 
-const machineDefinition = {
-  states: [
-    {
-      name: 'light off',
-      events: {
-        'light on': {
-          nextState: 'light on'
-        },
-        'turn light on': {
-          nextState: 'light on',
-          action: ['setRelay', 'on']
-        }
-      }
-    },
-    {
-      name: 'light on',
-      events: {
-        'light off': {
-          nextState: 'light off'
-        },
-        'turn light off': {
-          nextState: 'wait for light off',
-          actions: [
-            ['setRelay', 'off'],
-            ['setTimer', 200]
-          ]
-        },
-        'lightButton on': {
-          nextState: 'wait for light off',
-          actions: [
-            ['setRelay', 'off'],
-            ['setTimer', 200]
-          ]
-        }
-      }
-    },
-    {
-      name: 'wait for light off',
-      events: {
-        'light off': {
-          nextState: 'light off'
-        },
-        'turn light on': {
-          nextState: 'light on',
-          action: ['setRelay', 'on']
-        },
-        'timer expired': {
-          actions: [
-            'pressLightButton',
-            ['setTimer', 1000]
-          ]
-        }
+const machineDefinition = [
+  {
+    name: 'light off',
+    events: {
+      'light on': {
+        nextState: 'light on'
+      },
+      'turn light on': {
+        nextState: 'light on',
+        action: ['setRelay', 'on']
       }
     }
-  ]
-};
+  },
+  {
+    name: 'light on',
+    events: {
+      'light off': {
+        nextState: 'light off'
+      },
+      'turn light off': {
+        nextState: 'wait for light off',
+        actions: [
+          ['setRelay', 'off'],
+          ['setTimer', 200]
+        ]
+      },
+      'lightButton on': {
+        nextState: 'wait for light off',
+        actions: [
+          ['setRelay', 'off'],
+          ['setTimer', 200]
+        ]
+      }
+    }
+  },
+  {
+    name: 'wait for light off',
+    events: {
+      'light off': {
+        nextState: 'light off'
+      },
+      'turn light on': {
+        nextState: 'light on',
+        action: ['setRelay', 'on']
+      },
+      'timer expired': {
+        actions: [
+          'pressLightButton',
+          ['setTimer', 1000]
+        ]
+      }
+    }
+  }
+];
 
 const createLightMachine = () => {
-  const { addMethod, handleEvent } = createStateMachine(machineDefinition);
+  const { addMethod, handleEvent } = createStateMachine({
+    states: machineDefinition,
+    name: 'light',
+    logger: console
+  });
 
   addMethod(
     'setRelay',
@@ -156,11 +158,11 @@ const main = (serverUrl) => {
   keyboardListener.on('exit', () => process.exit(0));
   keyboardListener.on('event', event => {
     lightMachine.handleEvent(event.name);
-    messaging.send({to, message: event});
+    messaging.sendMessage({to, message: event});
   });
   pinListener.on('event', event => {
     lightMachine.handleEvent(event.name);
-    messaging.send({to, message: event});
+    messaging.sendMessage({to, message: event});
   });
   messaging.addClient(serverUrl);
 };

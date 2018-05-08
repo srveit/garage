@@ -36,16 +36,16 @@ module.exports = {
     doorButton: {
       pin: 19
     },
-    motorDown: {
-      pin: 6
-    },
+    // motorDown: {
+    //   pin: 6
+    // },
     light: {
       pin: 9,
       activeLow: true
     },
-    motorUp: {
-      pin: 11
-    },
+    // motorUp: {
+    //   pin: 11
+    // },
     openLimit: {
       pin: 15
     },
