@@ -167,7 +167,7 @@ const main = (serverUrl) => {
   messaging.addClient(serverUrl);
 };
 
-if (process.argv.length < 2) {
+if (process.argv.length <= 2) {
   console.error('error - missing server');
   console.error(`usage: ${process.argv[0]} ${process.argv[1]} server`);
   process.exit(1);
