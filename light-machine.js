@@ -148,13 +148,16 @@ app.use(function (req, res) {
   res.send({ msg: "hello" });
 });
 
-const main = (serverUrl) => {
+const main = (to) => {
   const lightMachine = createLightMachine(),
     messaging = createMessaging({app}),
     keyboardListener = newKeyboardListener(),
     pinListener = newPinListener(),
-    to = 'raven';
+    port = 8125,
+    serverUrl = `ws://${to}:${port}/`;
 
+  messaging.onConnection(connection =>
+                         console.log('new connection', connection, connection.peerIdentity()));
   keyboardListener.on('exit', () => process.exit(0));
   keyboardListener.on('event', event => {
     lightMachine.handleEvent(event.name);
