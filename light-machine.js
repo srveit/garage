@@ -167,6 +167,14 @@ const main = (to) => {
     lightMachine.handleEvent(event.name);
     messaging.sendMessage({to, message: event});
   });
+  messaging.onMessage(message => {
+    const event = message.message || {};
+
+    if (event.type === 'event') {
+      console.log('message', event);
+      lightMachine.handleEvent(event.name);
+    }
+  });
   messaging.addClient(serverUrl);
 };
 
