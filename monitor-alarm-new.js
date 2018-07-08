@@ -6,16 +6,13 @@ const EventEmitter = require('events'),
   {createMessaging} = require('../messaging'),
   {inputs} = require('./alarm-pins'),
 
-  capitalizeFirstLetter = string =>
-    string.charAt(0).toUpperCase() + string.slice(1),
-
   newInputListener = () => {
     const inputListener = new EventEmitter();
 
     const logState = (state, inputName) => {
       const event = {
         type: 'event',
-        name: `${inputName}${capitalizeFirstLetter(state)}`,
+        name: `${inputName} ${state}`,
         state,
         time: moment()
       };
