@@ -23,7 +23,6 @@ const Rpio = require('rpio'),
       pin = output.pin,
       level = (state === 'on' && !activeLow || state === 'off' && activeLow) ?
       Rpio.HIGH : Rpio.LOW;
-    console.log(pin, level);
     Rpio.write(pin, level);
   },
 

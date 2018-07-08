@@ -2,9 +2,8 @@
 
 const gpioInput = require('./gpio-input'),
   moment = require('moment'),
-  {inputPins} = require('./garage-pins');
+  {inputPins} = require('./garage-pins'),
+  report = (value, pin) => console.log(moment().format('M/D/YY H:mm:ss A'), pin, value);
 
 gpioInput.openPins(inputPins);
-gpioInput.monitorPin(22, (value, pin) => console.log(moment().toISOString(), pin, value));
-gpioInput.monitorPin(21, (value, pin) => console.log(moment().toISOString(), pin, value));
-gpioInput.monitorPin(29, (value, pin) => console.log(moment().toISOString(), pin, value));
+gpioInput.monitorInputs(inputPins, report);
