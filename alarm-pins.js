@@ -5,7 +5,7 @@ module.exports = {
     garageDoor: {
       pin: 37,
       activeLow: true,
-      stateLabels: ['closed', 'open']
+      stateLabels: ['open', 'closed']
     }
   }
 };
