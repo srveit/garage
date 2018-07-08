@@ -67,7 +67,7 @@ const Rpio = require('rpio'),
   },
 
   // Pin numbers are the physical numbers on the GPIO connector
-  openOuputs = outputs => {
+  openOutputs = outputs => {
     for (const output of Object.values(outputs)) {
       Rpio.open(
         output.pin,
@@ -94,6 +94,6 @@ const Rpio = require('rpio'),
 
 exports.openInputs = openInputs;
 exports.monitorInputs = monitorInputs;
-exports.openOuputs = openOuputs;
+exports.openOutputs = openOutputs;
 exports.setOutput = setOutput;
 exports.pressButton = pressButton;

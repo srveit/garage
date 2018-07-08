@@ -1,5 +1,5 @@
 'use strict';
-const {openOuputs, setOutput} = require('./gpio'),
+const {openOutputs, setOutput} = require('./gpio'),
   {outputs} = require('./garage-pins');
 
 if (process.argv.length < 3) {
@@ -8,5 +8,5 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-openOuputs(outputs);
+openOutputs(outputs);
 setOutput('orangeLed', process.argv[2], outputs);

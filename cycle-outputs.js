@@ -1,10 +1,10 @@
 'use strict';
-const {openOuputs, pressButton} = require('./gpio'),
+const {openOutputs, pressButton} = require('./gpio'),
   {outputs} = require('./garage-pins'),
 
   main = async () => {
     const duration = 5000;
-    openOuputs(outputs);
+    openOutputs(outputs);
     await pressButton('orangeLed', duration, outputs);
     await pressButton('redLed', duration, outputs);
     await pressButton('lightButton', duration, outputs);
