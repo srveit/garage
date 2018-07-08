@@ -44,14 +44,15 @@ const Rpio = require('rpio'),
     let previousValue;
     const input = inputs[name],
       pin = input.pin,
-      activeLow = input.activeLow;
+      activeLow = input.activeLow,
+      stateLabels = input.stateLabels || ['off', 'on'];
 
     while (true) {
       const value = await readPin(pin);
       if (previousValue !== value) {
         previousValue = value;
         handler(
-          activeLow ? (value ? 'off' : 'on') : (value ? 'on' : 'off'),
+          stateLabels[activeLow ? 1 - value : value],
           name
         );
       }
