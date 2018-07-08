@@ -3,9 +3,9 @@ module.exports = {
   outputPins: {},
   inputPins: {
     garageDoor: {
-      pin: 37,
-      pullUp: true,
-      stateLabels: ['closed', 'open']
+      pin: 15,
+      pullDown: true,
+      stateLabels: ['open', 'closed']
     }
   }
 };
