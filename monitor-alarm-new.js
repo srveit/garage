@@ -14,6 +14,7 @@ const EventEmitter = require('events'),
 
     const logState = (state, inputName) => {
       const event = {
+        type: 'event',
         name: `${inputName}${capitalizeFirstLetter(state)}`,
         state,
         time: moment()

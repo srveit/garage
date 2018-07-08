@@ -98,6 +98,7 @@ const express = require('express'),
 
     const logState = (state, inputName) => {
       const event = {
+        type: 'event',
         name: `${inputName}${capitalizeFirstLetter(state)}`,
         state,
         time: moment()
