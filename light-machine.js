@@ -8,7 +8,7 @@ const express = require('express'),
   url = require('url'),
   {createMessaging} = require('../messaging'),
   {createStateMachine} = require('../state-machine'),
-  {pressButton, setOutput, monitorInputs} = require('./gpio'),
+  {openInputs, openOutputs, pressButton, setOutput, monitorInputs} = require('./gpio'),
   {inputs, outputs} = require('./garage-pins'),
   app = express(),
 
@@ -151,6 +151,8 @@ const express = require('express'),
       port = 8125,
       serverUrl = `ws://${to}:${port}/`;
 
+    openInputs(inputs);
+    openOutputs(outputs);
     configureApp(app);
     messaging.onConnection(connection =>
                            console.log('new connection', connection, connection.peerIdentity()));
