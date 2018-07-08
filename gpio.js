@@ -40,7 +40,7 @@ const Rpio = require('rpio'),
     );
   }),
 
-  monitorPin = async (inputName, inputs, handler) => {
+  monitorInput = async (inputName, inputs, handler) => {
     let previousValue;
     const input = inputs[inputName],
       pin = input.pin,
@@ -60,7 +60,7 @@ const Rpio = require('rpio'),
   },
 
   monitorInputs = async (inputs, handler) => Object.keys(inputs)
-  .map(inputName => monitorPin(inputName, inputs, handler)),
+  .map(inputName => monitorInput(inputName, inputs, handler)),
 
   sleep = ms => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -93,7 +93,6 @@ const Rpio = require('rpio'),
   };
 
 exports.openInputs = openInputs;
-exports.monitorPin = monitorPin;
 exports.monitorInputs = monitorInputs;
 exports.openOuputs = openOuputs;
 exports.setOutput = setOutput;

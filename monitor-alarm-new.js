@@ -9,19 +9,8 @@ const EventEmitter = require('events'),
   capitalizeFirstLetter = string =>
     string.charAt(0).toUpperCase() + string.slice(1),
 
-  generateEvent = (name, state, oldState) => {
-    if (state[name] !== oldState[name]) {
-      return {
-        name,
-        state: state[name],
-        time: moment()
-      };
-    }
-    return undefined;
-  },
-
-  newPinListener = () => {
-    const pinListener = new EventEmitter();
+  newInputListener = () => {
+    const inputListener = new EventEmitter();
 
     const logState = (state, inputName) => {
       const event = {
@@ -29,21 +18,21 @@ const EventEmitter = require('events'),
         state,
         time: moment()
       };
-      pinListener.emit('event', event);
+      inputListener.emit('event', event);
     };
     monitorInputs(inputs, logState);
-    return pinListener;
+    return inputListener;
   },
 
   main = async (to) => {
     const port = 8125,
       serverUrl = `ws://${to}:${port}/`,
       messaging = createMessaging(),
-      pinListener = newPinListener();
+      inputListener = newInputListener();
 
     openInputs(inputs);
     messaging.addClient(serverUrl);
-    pinListener.on('event', event => {
+    inputListener.on('event', event => {
       messaging.sendMessage({to, message: event});
     });
   };
