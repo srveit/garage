@@ -35,14 +35,14 @@ const express = require('express'),
           nextState: 'wait for light off',
           actions: [
             ['setRelay', 'off'],
-            ['setTimer', 200]
+            ['setTimer', 400]
           ]
         },
         'lightButton on': {
           nextState: 'wait for light off',
           actions: [
             ['setRelay', 'off'],
-            ['setTimer', 200]
+            ['setTimer', 400]
           ]
         }
       }
