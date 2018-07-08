@@ -2,7 +2,6 @@
 const express = require('express'),
   EventEmitter = require('events'),
   http = require('http'),
-  _ = require('lodash'),
   moment = require('moment'),
   os = require('os'),
   readline = require('readline'),
