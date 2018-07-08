@@ -8,6 +8,7 @@ const util = require('util'),
   _ = require('lodash'),
   q = require('q'),
   Gpio = onoff.Gpio,
+  Rpio = require('rpio'),
   outputs = {};
 
 function sleep(ms) {

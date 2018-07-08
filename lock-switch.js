@@ -1,5 +1,5 @@
 'use strict';
-const { setOutput } = require('./garage'),
+const {openPins, setOutput} = require('./gpio-output'),
   {outputPins} = require('./garage-pins');
 
 if (process.argv.length < 3) {
@@ -8,8 +8,5 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-setOutput('lockSwitch', process.argv[2], outputPins)
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+openPins(outputPins);
+setOutput('lockSwitch', process.argv[2], outputPins);

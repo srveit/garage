@@ -1,5 +1,7 @@
 'use strict';
-const { pressButton } = require('./garage'),
+const {openPins, pressButton, setOutput} = require('./gpio-output'),
   {outputPins} = require('./garage-pins');
 
-pressButton('lightButton', 1000, outputPins);
+openPins(outputPins);
+// pressButton('lightButton', 1000, outputPins);
+setOutput('lightButton', process.argv[2], outputPins);

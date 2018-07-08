@@ -3,7 +3,7 @@ module.exports = {
   outputPins: {},
   inputPins: {
     garageDoor: {
-      pin: 26,
+      pin: 37,
       activeLow: true
     }
   }

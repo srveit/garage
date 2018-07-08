@@ -2,56 +2,55 @@
 module.exports = {
   outputPins: {
     doorButton: {
-      pin: 2,
-      level: 'high'
-    },
-    orangeLed: {
-      pin: 4,
-      level: 'low'
-    },
-    redLed: {
-      pin: 17,
-      level: 'low'
-    },
-    lightButton: {
-      pin: 27,
-      level: 'high'
-    },
-    lightRelay: {
-      pin: 23,
-      level: 'high'
-    },
-    lockSwitch: {
-      pin: 3,
-      level: 'high'
-    }
-  },
-  inputPins: {
-    lightButton: {
-      pin: 25
+      pin: 3
     },
     lockSwitch: {
       pin: 5
     },
-    doorButton: {
-      pin: 19
+    lightButton: {
+      pin: 13
     },
-    // motorDown: {
-    //   pin: 6
-    // },
-    light: {
-      pin: 9,
+    lightRelay: {
+      pin: 16
+    },
+    orangeLed: {
+      pin: 7,
       activeLow: true
     },
-    // motorUp: {
-    //   pin: 11
-    // },
+    redLed: {
+      pin: 11,
+      activeLow: true
+    }
+  },
+  inputPins: {
+    light: {
+      pin: 21,
+      pullUp: true,
+      activeLow: true
+    },
+    motorUp: {
+      pin: 23,
+      pullUp: true
+    },
+    motorDown: {
+      pin: 31,
+      pullUp: true
+    },
     openLimit: {
-      pin: 15
+      pin: 10
     },
     closeLimit: {
-      pin: 26,
+      pin: 37,
       activeLow: true
+    },
+    doorButton: {
+      pin: 35
+    },
+    lightButton: {
+      pin: 22
+    },
+    lockSwitch: {
+      pin: 29
     }
   }
 };
