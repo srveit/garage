@@ -1,16 +1,16 @@
 'use strict';
-const {openPins, pressButton} = require('./gpio-output'),
-  {outputPins} = require('./garage-pins'),
+const {openOuputs, pressButton} = require('./gpio-output'),
+  {outputs} = require('./garage-pins'),
 
   main = async () => {
     const duration = 5000;
-    openPins(outputPins);
-    await pressButton('orangeLed', duration, outputPins);
-    await pressButton('redLed', duration, outputPins);
-    await pressButton('lightButton', duration, outputPins);
-    await pressButton('lockSwitch', duration, outputPins);
-    await pressButton('doorButton', duration, outputPins);
-    await pressButton('lightRelay', duration, outputPins);
+    openOuputs(outputs);
+    await pressButton('orangeLed', duration, outputs);
+    await pressButton('redLed', duration, outputs);
+    await pressButton('lightButton', duration, outputs);
+    await pressButton('lockSwitch', duration, outputs);
+    await pressButton('doorButton', duration, outputs);
+    await pressButton('lightRelay', duration, outputs);
 }
 
 main();

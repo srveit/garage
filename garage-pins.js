@@ -1,6 +1,6 @@
 'use strict';
 module.exports = {
-  outputPins: {
+  outputs: {
     doorButton: {
       pin: 3,
       activeLow: true
@@ -26,7 +26,7 @@ module.exports = {
       activeLow: true
     }
   },
-  inputPins: {
+  inputs: {
     light: {
       pin: 21,
       pullUp: true,

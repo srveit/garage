@@ -15,18 +15,18 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function getOutput(name, outputPins) {
-  if (!outputPins[name]) {
+function getOutput(name, outputs) {
+  if (!outputs[name]) {
     return undefined;
   }
   if (!outputs[name]) {
-    outputs[name] = new Gpio(outputPins[name].pin, outputPins[name].level);
+    outputs[name] = new Gpio(outputs[name].pin, outputs[name].level);
   }
   return outputs[name];
 }
 
-function pressButton(button, duration, outputPins) {
-  const gpio = getOutput(button, outputPins);
+function pressButton(button, duration, outputs) {
+  const gpio = getOutput(button, outputs);
   if (!gpio) {
     return Promise.reject({error: 'output ' + button + ' not found'});
   }
@@ -38,8 +38,8 @@ function pressButton(button, duration, outputPins) {
     });
 }
 
-function setOutput(name, state, outputPins) {
-  const gpio = getOutput(name, outputPins);
+function setOutput(name, state, outputs) {
+  const gpio = getOutput(name, outputs);
   if (!gpio) {
     return Promise.reject({error: 'output ' + name + ' not found'});
   }
@@ -147,8 +147,8 @@ function pollerEventHandler(err, fd, events) {
   });
 }
 
-async function watchInputs(inputPins, handleStateChange) {
-  const inputs = _.reduce(inputPins, (inputs, inputPin, name) => {
+async function watchInputs(inputs, handleStateChange) {
+  const inputs = _.reduce(inputs, (inputs, inputPin, name) => {
     inputs[name] = new Gpio(inputPin.pin, 'in', 'both', {
       debounceTimeout: 5,
       activeLow: inputPin.activeLow

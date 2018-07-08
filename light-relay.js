@@ -1,6 +1,6 @@
 'use strict';
-const {openPins, setOutput} = require('./gpio-output'),
-  {outputPins} = require('./garage-pins');
+const {openOuputs, setOutput} = require('./gpio-output'),
+  {outputs} = require('./garage-pins');
 
 if (process.argv.length < 3) {
   console.error('error - state must be specified.');
@@ -8,5 +8,5 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-openPins(outputPins);
-setOutput('lightRelay', process.argv[2], outputPins);
+openOuputs(outputs);
+setOutput('lightRelay', process.argv[2], outputs);

@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
-  outputPins: {},
-  inputPins: {
+  outputs: {},
+  inputs: {
     garageDoor: {
       pin: 15,
       pullDown: true,

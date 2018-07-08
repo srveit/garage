@@ -3,7 +3,7 @@
 const Rpio = require('rpio'),
 
   // Pin numbers are the physical numbers on the GPIO connector
-  openPins = inputs => {
+  openInputs = inputs => {
     for (const input of Object.values(inputs)) {
       Rpio.open(
         input.pin,
@@ -40,9 +40,9 @@ const Rpio = require('rpio'),
     );
   }),
 
-  monitorPin = async (name, inputs, handler) => {
+  monitorPin = async (inputName, inputs, handler) => {
     let previousValue;
-    const input = inputs[name],
+    const input = inputs[inputName],
       pin = input.pin,
       activeLow = input.activeLow,
       stateLabels = input.stateLabels || ['off', 'on'];
@@ -53,16 +53,15 @@ const Rpio = require('rpio'),
         previousValue = value;
         handler(
           stateLabels[activeLow ? 1 - value : value],
-          name
+          inputName
         );
       }
     }
   },
 
-  monitorInputs = async (inputs, handler) => {
-    Object.keys(inputs).map(name => monitorPin(name, inputs, handler));
+  monitorInputs = async (inputs, handler) => Object.keys(inputs)
+    .map(inputName => monitorPin(inputName, inputs, handler));
 
-  };
-exports.openPins = openPins;
+exports.openInputs = openInputs;
 exports.monitorPin = monitorPin;
 exports.monitorInputs = monitorInputs;

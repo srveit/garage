@@ -10,7 +10,7 @@ const express = require('express'),
   {createMessaging} = require('../messaging'),
   {createStateMachine} = require('../state-machine'),
   {pressButton, setOutput, watchInputs} = require('./garage'),
-  {inputPins, outputPins} = require('./garage-pins'),
+  {inputs, outputs} = require('./garage-pins'),
   app = express();
 
 const machineDefinition = [
@@ -77,12 +77,12 @@ const createLightMachine = () => {
 
   addMethod(
     'setRelay',
-    state => setOutput('lightRelay', state, outputPins)
+    state => setOutput('lightRelay', state, outputs)
       .then(newState => console.info('lightRelay', newState))
   );
   addMethod(
     'pressLightButton',
-    () => pressButton('lightButton', 500, outputPins)
+    () => pressButton('lightButton', 500, outputs)
   );
   return Object.freeze({
     handleEvent
@@ -105,13 +105,13 @@ const newPinListener = () => {
   const pinListener = new EventEmitter();
 
   const logState = (state, oldState) => {
-    const events = Object.keys(inputPins)
+    const events = Object.keys(inputs)
             .map(input => generateEvent(input, state, oldState))
             .filter(event => event);
 
     events.map(event => pinListener.emit('event', event));
   };
-  watchInputs(inputPins, logState);
+  watchInputs(inputs, logState);
   return pinListener;
 };
 

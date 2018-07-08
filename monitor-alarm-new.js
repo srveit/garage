@@ -1,53 +1,52 @@
 'use strict';
+
 const EventEmitter = require('events'),
   moment = require('moment'),
-  {watchInputs} = require('./garage'),
+  {openInputs, monitorInputs} = require('./gpio-input'),
   {createMessaging} = require('../messaging'),
-  {inputPins} = require('./alarm-pins');
+  {inputs} = require('./alarm-pins'),
 
-const generateEvent = (name, state, oldState) => {
-  if (state[name] !== oldState[name]) {
-    return {
-      name,
-      state: state[name],
-      time: moment()
+  capitalizeFirstLetter = string =>
+    string.charAt(0).toUpperCase() + string.slice(1),
+
+  generateEvent = (name, state, oldState) => {
+    if (state[name] !== oldState[name]) {
+      return {
+        name,
+        state: state[name],
+        time: moment()
+      };
+    }
+    return undefined;
+  },
+
+  newPinListener = () => {
+    const pinListener = new EventEmitter();
+
+    const logState = (state, inputName) => {
+      const event = {
+        name: `${inputName}${capitalizeFirstLetter(state)}`,
+        state,
+        time: moment()
+      };
+      pinListener.emit('event', event);
     };
-  }
-  return undefined;
-};
+    monitorInputs(inputs, logState);
+    return pinListener;
+  },
 
-const newPinListener = () => {
-  const pinListener = new EventEmitter();
+  main = async (to) => {
+    const port = 8125,
+      serverUrl = `ws://${to}:${port}/`,
+      messaging = createMessaging(),
+      pinListener = newPinListener();
 
-  const logState = (state, oldState) => {
-    const events = Object.keys(inputPins)
-      .map(input => generateEvent(input, state, oldState))
-      .filter(event => event)
-      .map(event => {
-        return {
-          type: 'event',
-          name: `${event.name}${event.state ? 'Closed' : 'Opened'}`,
-          time: event.time
-        };
-      });
-
-    events.map(event => pinListener.emit('event', event));
+    openInputs(inputs);
+    messaging.addClient(serverUrl);
+    pinListener.on('event', event => {
+      messaging.sendMessage({to, message: event});
+    });
   };
-  watchInputs(inputPins, logState);
-  return pinListener;
-};
-
-const main = async (to) => {
-  const port = 8125,
-    serverUrl = `ws://${to}:${port}/`,
-    messaging = createMessaging(),
-    pinListener = newPinListener();
-
-  messaging.addClient(serverUrl);
-  pinListener.on('event', event => {
-    messaging.sendMessage({to, message: event});
-  });
-};
 
 if (process.argv.length <= 2) {
   console.error('error - missing server');
