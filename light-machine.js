@@ -77,8 +77,10 @@ const express = require('express'),
 
     addMethod(
       'setRelay',
-      state => setOutput('lightRelay', state, outputs)
-        .then(newState => console.info('lightRelay', newState))
+      async state => {
+        const newState = await setOutput('lightRelay', state, outputs);
+        console.info('lightRelay', newState);
+      }
     );
     addMethod(
       'pressLightButton',
@@ -137,10 +139,8 @@ const express = require('express'),
   configureApp = app => {
 
     app.get('/', (req, res) => res.send('Hello World!'));
-    
-    app.use(function (req, res) {
-      res.send({ msg: "hello" });
-    });
+
+    app.use((req, res) => res.send({msg: 'hello'}));
   },
 
   main = (to) => {
