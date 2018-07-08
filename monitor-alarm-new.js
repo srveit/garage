@@ -2,7 +2,7 @@
 
 const EventEmitter = require('events'),
   moment = require('moment'),
-  {openInputs, monitorInputs} = require('./gpio-input'),
+  {openInputs, monitorInputs} = require('./gpio'),
   {createMessaging} = require('../messaging'),
   {inputs} = require('./alarm-pins'),
 

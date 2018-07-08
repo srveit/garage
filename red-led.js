@@ -1,5 +1,5 @@
 'use strict';
-const {openOuputs, setOutput} = require('./gpio-output'),
+const {openOuputs, setOutput} = require('./gpio'),
   {outputs} = require('./garage-pins');
 
 if (process.argv.length < 3) {

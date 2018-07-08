@@ -1,5 +1,5 @@
 'use strict';
-const {openOuputs, pressButton} = require('./gpio-output'),
+const {openOuputs, pressButton} = require('./gpio'),
   {outputs} = require('./garage-pins');
 
 openOuputs(outputs);
