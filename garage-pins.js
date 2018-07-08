@@ -48,8 +48,8 @@ module.exports = {
     closeLimit: {
       pin: 37,
       pullUp: true,
-      stateLabels: ['closed', 'open'],
-      activeLow: true
+      activeLow: true,
+      stateLabels: ['closed', 'open']
     },
     doorButton: {
       pin: 35,

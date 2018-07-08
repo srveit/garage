@@ -4,8 +4,8 @@ module.exports = {
   inputPins: {
     garageDoor: {
       pin: 37,
-      activeLow: true,
-      stateLabels: ['open', 'closed']
+      pullUp: true,
+      stateLabels: ['closed', 'open']
     }
   }
 };
