@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 'use strict';
 const express = require('express'),
   EventEmitter = require('events'),
@@ -143,7 +145,7 @@ const express = require('express'),
   main = (to) => {
     const lightMachine = createLightMachine(),
       messaging = createMessaging({app}),
-      keyboardListener = newKeyboardListener(),
+      // keyboardListener = newKeyboardListener(),
       inputListener = newInputListener(),
       port = 8125,
       serverUrl = `ws://${to}:${port}/`;
@@ -153,15 +155,15 @@ const express = require('express'),
     configureApp(app);
     messaging.onConnection(connection =>
                            console.log('new connection', connection, connection.peerIdentity()));
-    keyboardListener.on('exit', () => process.exit(0));
-    keyboardListener.on('event', event => {
-      lightMachine.handleEvent(event.name);
-      messaging.sendMessage({to, message: event});
-    });
+    // keyboardListener.on('exit', () => process.exit(0));
+    // keyboardListener.on('event', event => {
+    //   lightMachine.handleEvent(event.name);
+    //   messaging.sendMessage({to, message: event});
+    // });
     inputListener.on('event', event => {
       lightMachine.handleEvent(event.name);
       messaging.sendMessage({to, message: event});
-    });
+     });
     messaging.onMessage(message => {
       const event = message.message || {};
 

@@ -4,7 +4,8 @@
   "description": "Garage door opener based on Raspberry Pi Zero W",
   "main": "garage.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "light-machine": "node light-machine.js pi-alarm"
   },
   "author": "Stephen R. Veit",
   "repository": {

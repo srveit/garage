@@ -1,0 +1,12 @@
+[Unit]
+Description=Node.js Garage Light Server
+[Service]
+PIDFile=/tmp/light-machine-99.pid
+User=pi
+Group=pi
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=/home/pi/projects/node/garage/
+ExecStart=/home/pi/projects/node/garage/light-machine.sh
+[Install]
+WantedBy=multi-user.target
