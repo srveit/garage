@@ -50,6 +50,7 @@ const Rpio = require('rpio'),
     while (true) {
       const value = await readPin(pin);
       if (previousValue !== value) {
+        console.log(`${inputName} ${previousValue} => ${value}`);
         previousValue = value;
         handler(
           stateLabels[activeLow ? 1 - value : value],
