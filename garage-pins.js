@@ -51,6 +51,23 @@ module.exports = {
       activeLow: true,
       stateLabels: ['open', 'closed']
     },
+    buttons: {
+      pinSet: [
+        {
+          pin: 35,
+          pullUp: true
+        },
+        {
+          pin: 22,
+          pullUp: true
+        },
+        {
+          pin: 29,
+          pullUp: true
+        }
+      ],
+      stateLabels: ['0', '1', '2', '3', '4', '5', '6', '7']
+    },
     doorButton: {
       pin: 35,
       pullUp: true

@@ -5,6 +5,7 @@ const Rpio = require('rpio'),
   // Pin numbers are the physical numbers on the GPIO connector
   openInputs = inputs => {
     for (const input of Object.values(inputs)) {
+      // TODO: handle pinSets
       Rpio.open(
         input.pin,
         Rpio.INPUT,
@@ -40,20 +41,49 @@ const Rpio = require('rpio'),
     );
   }),
 
+  readPinSet = pinSet => new Promise(resolve => {
+    let index = 0;
+    const length = 40,
+      interval = 4,
+      buffers = pinSet.map(() => Buffer.alloc(length, ' ', 'ascii')),
+      intervalId = setInterval(
+        () => {
+          for (let i = 0; i < pinSet.length; i++) {
+            buffers[i][index] = Rpio.read(pinSet[i].pin);
+          }
+          index += 1;
+          if (index >= length) {
+            clearInterval(intervalId);
+            resolve(buffers.map(bufferValue).reduce(
+              (acc, value) => acc * 2 + value,
+              0
+            ));
+          }
+        },
+        interval
+      );
+  }),
+
   monitorInput = async (inputName, inputs, handler) => {
     let previousValue;
     const input = inputs[inputName],
-      pin = input.pin,
-      activeLow = input.activeLow,
       stateLabels = input.stateLabels || ['off', 'on'];
 
     while (true) {
-      const value = await readPin(pin);
+      let value;
+      if (input.pinSet) {
+        value = await readPinSet(input.pinSet);        
+      } else {
+        value = await readPin(input.pin);
+        if (input.activeLow) {
+          value = 1 - value;
+        }
+      }
       if (previousValue !== value) {
         console.log(`${inputName} ${previousValue} => ${value}`);
         previousValue = value;
         handler(
-          stateLabels[activeLow ? 1 - value : value],
+          stateLabels[value],
           inputName
         );
       }
@@ -61,7 +91,7 @@ const Rpio = require('rpio'),
   },
 
   monitorInputs = async (inputs, handler) => Object.keys(inputs)
-  .map(inputName => monitorInput(inputName, inputs, handler)),
+    .map(inputName => monitorInput(inputName, inputs, handler)),
 
   sleep = ms => {
     return new Promise(resolve => setTimeout(resolve, ms));
