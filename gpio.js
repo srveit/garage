@@ -5,13 +5,23 @@ const Rpio = require('rpio'),
   // Pin numbers are the physical numbers on the GPIO connector
   openInputs = inputs => {
     for (const input of Object.values(inputs)) {
-      // TODO: handle pinSets
-      Rpio.open(
-        input.pin,
-        Rpio.INPUT,
-        input.pullUp ? Rpio.PULL_UP :
-          (input.pullDown ? Rpio.PULL_DOWN : Rpio.PULL_OFF)
-      );
+      if (input.pinSet) {
+        for (const input2 of input.pinSet) {
+          Rpio.open(
+            input2.pin,
+            Rpio.INPUT,
+            input2.pullUp ? Rpio.PULL_UP :
+              (input2.pullDown ? Rpio.PULL_DOWN : Rpio.PULL_OFF)
+          );
+        }
+      } else {
+        Rpio.open(
+          input.pin,
+          Rpio.INPUT,
+          input.pullUp ? Rpio.PULL_UP :
+            (input.pullDown ? Rpio.PULL_DOWN : Rpio.PULL_OFF)
+        );
+      }
     }
   },
 
@@ -81,11 +91,22 @@ const Rpio = require('rpio'),
       }
       if (previousValue !== value) {
         console.log(`${inputName} ${previousValue} => ${value}`);
-        previousValue = value;
-        handler(
-          stateLabels[value],
-          inputName
-        );
+        if (input.transitions) {
+          const [name, label] = input.transitions &&
+            input.transitions[previousValue] &&
+            input.transitions[previousValue][value] ||
+            [inputName, stateLabels[value] || value];
+          previousValue = value;
+          if (name) {
+            handler(label, name);
+          }
+        } else {
+          previousValue = value;
+          handler(
+            stateLabels[value],
+            inputName
+          );
+        }
       }
     }
   },

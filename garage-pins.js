@@ -54,32 +54,60 @@ module.exports = {
     buttons: {
       pinSet: [
         {
+          // bit 0
+          // lightButton 120k
           pin: 35,
           pullUp: true
         },
         {
-          pin: 22,
+          // bit 1
+          // lockSwitch 18k
+          pin: 29,
           pullUp: true
         },
         {
-          pin: 29,
+          // bit 2
+          // doorButton 3.9k
+          pin: 22,
           pullUp: true
         }
       ],
-      stateLabels: ['0', '1', '2', '3', '4', '5', '6', '7']
-    },
-    doorButton: {
-      pin: 35,
-      pullUp: true
-    },
-    lightButton: {
-      pin: 22,
-      pullUp: true
-    },
-    lockSwitch: {
-      pin: 29,
-      pullUp: true,
-      stateLabels: ['unlocked', 'locked']
+      transitions: {
+        0: {
+          1: ['lightButton', 'on'],
+          3: ['lockSwitch', 'locked'],
+          7: ['doorButton', 'on'],
+        },
+        1: {
+          0: ['lightButton', 'off'],
+          3: ['lockSwitch', 'locked'],
+          7: ['doorButton', 'on']
+        },
+        3: {
+          0: ['lockSwitch', 'unlocked'],
+          1: ['lightButton', 'on'],
+          7: ['doorButton', 'on']
+        },
+        7: {
+          0: ['doorButton', 'off'],
+          1: ['lightButton', 'on'],
+          3: ['lockSwitch', 'locked']
+        }
+      },
+      stateLabels: ['0', 'lightButton on', '2', 'lockSwitch locked', '4', '5', '6', 'doorButton on']
     }
+    // doorButton: {
+    //   pin: 35,
+    //   pullUp: true
+    // },
+    // lightButton: {
+    //   pin: 22,
+    //   pullUp: true
+    // },
+    // lockSwitch: {
+    //   pin: 29,
+    //   pullUp: true,
+    //   stateLabels: ['unlocked', 'locked']
+    // }
   }
 };
