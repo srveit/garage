@@ -1,7 +1,6 @@
 'use strict';
 
 const EventEmitter = require('events'),
-  moment = require('moment'),
   {openInputs, monitorInputs} = require('./gpio'),
   {createMessaging} = require('../messaging'),
   {inputs} = require('./alarm-pins'),
@@ -14,7 +13,7 @@ const EventEmitter = require('events'),
         type: 'event',
         name: `${inputName} ${state}`,
         state,
-        time: moment()
+        time: new Date()
       };
       inputListener.emit('event', event);
     };

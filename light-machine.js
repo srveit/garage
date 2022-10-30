@@ -4,7 +4,6 @@
 const express = require('express'),
   EventEmitter = require('events'),
   http = require('http'),
-  moment = require('moment'),
   os = require('os'),
   readline = require('readline'),
   url = require('url'),
@@ -100,7 +99,7 @@ const express = require('express'),
         type: 'event',
         name: `${inputName} ${state}`,
         state,
-        time: moment()
+        time: new Date()
       };
       inputListener.emit('event', event);
     };
@@ -120,14 +119,14 @@ const express = require('express'),
           source: os.hostname(),
           type: 'event',
           name: 'turn light off',
-          time: moment()
+          time: new Date()
         });
       } else if (key.name === 'o') {
         keyboardListener.emit('event', {
           source: os.hostname(),
           type: 'event',
           name: 'turn light on',
-          time: moment()
+          time: new Date()
         });
       }
     });
