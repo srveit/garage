@@ -2,20 +2,81 @@
   "name": "garage",
   "version": "1.0.0",
   "description": "Garage door opener based on Raspberry Pi Zero W",
-  "main": "garage.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "light-machine": "node light-machine.js pi-alarm"
-  },
-  "author": "Stephen R. Veit",
+  "keywords": [
+    "raspberry pi",
+    "garage"
+  ],
+  "homepage": "https://github.com/srveit/garage#readme",
   "repository": {
     "type": "git",
-    "url": "git://github.com/srveit/node_projects.git"
+    "url": "git@github.com/srveit/garage.git"
   },
-  "license": "ISC",
+  "bugs": {
+    "email": "steve@veitconsulting.com",
+    "url": "https://github.com/srveit/garage/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Stephen R. Veit",
+    "email": "steve@veitconsulting.com",
+    "url": "http://veitconsulting.com"
+  },
+  "contributors": [],
+  "main": "garage.js",
+  "bin": {},
+  "man": [],
+  "config": {},
+  "scripts": {
+    "docs": "jsdoc --configure .jsdocrc.json",
+    "lint": "eslint . --ext .js,.json",
+    "lint-markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "light-machine": "node bin/light-machine.js pi-alarm",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "node_modules",
+      "mock-server.js"
+    ],
+    "coverageProvider": "v8",
+    "coverageDirectory": "./coverage/",
+    "coverageReporters": [
+      "clover",
+      "html",
+      "json",
+      "lcov",
+      "text-summary"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 75
+      }
+    }
+  },
   "dependencies": {
-    "express": "^4.16.3",
-    "rpio": "^0.9.22",
-    "ws": "^4.1.0"
+    "express": "^4.18.2",
+    "messaging": "github:srveit/messaging#master",
+    "rpio": "^2.4.2",
+    "state-machine": "github:srveit/state-machine#master"
+  },
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "github:standard/eslint-config-standard",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^27.1.3",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-n": "^15.4.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "jsdoc": "^3.6.11",
+    "markdownlint-cli2": "^0.5.1"
+  },
+  "overrides": {},
+  "engines": {
+    "node": ">= 14.0.0"
   }
 }
