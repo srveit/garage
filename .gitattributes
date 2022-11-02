@@ -1,0 +1,7 @@
+# Convert text file line endings to lf
+* text=auto
+
+*.js text eol=lf
+
+# These test fixtures are text files.
+/spec/fixtures/*.txt text eol=lf
