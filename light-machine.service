@@ -6,7 +6,7 @@ User=pi
 Group=pi
 Restart=always
 KillSignal=SIGQUIT
-WorkingDirectory=/home/pi/projects/node/garage/
-ExecStart=/home/pi/projects/node/garage/bin/light-machine.sh
+WorkingDirectory=/home/pi/garage/
+ExecStart=/home/pi/garage/bin/light-machine.sh
 [Install]
 WantedBy=multi-user.target
